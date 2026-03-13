@@ -1,11 +1,11 @@
-# Somatic Mutation Bioinformatics Pipelines
+# Sequencing Quality and Cross-Test Somatic Benchmark Pipelines
 
-Pipelines for analyzing somatic mutation sequencing data and 
-benchmarking mutation calling performance.
+Pipelines for sequencing quality assessment and cross-test somatic
+variant benchmarking.
 
 This repository contains **two independent analysis workflows**:
 
-1.  **Fig1 Sequencing Metrics Pipeline** -- calculates sequencing
+1.  **Sequencing Metrics Pipeline** -- calculates sequencing
     quality metrics and generates coverage, Lorenz, depth, and VAF plots
     from BAM and VCF files.
 2.  **Cross‑Test Somatic Mutation Benchmark Pipeline** -- evaluates
@@ -17,8 +17,7 @@ This repository contains **two independent analysis workflows**:
 # Table of Contents
 
 -   [Repository Structure](#repository-structure)
--   [Pipeline 1: Sequencing Metrics
-    (Fig1)](#pipeline-1-sequencing-metrics-fig1)
+-   [Pipeline 1: Sequencing Metrics](#pipeline-1-sequencing-metrics)
     -   [Inputs](#inputs)
     -   [Run](#run)
     -   [Outputs](#outputs)
@@ -29,7 +28,6 @@ This repository contains **two independent analysis workflows**:
     -   [Inputs](#inputs-1)
     -   [Run](#run-1)
     -   [Outputs](#outputs-1)
--   [Reproducibility](#reproducibility)
 -   [License](#license)
 
 ------------------------------------------------------------------------
@@ -40,13 +38,13 @@ Example layout:
 
     repo/
     │
-    ├── run_fig1_pipeline.sh
-    ├── plot_fig1_metrics.R
+    ├── run_sequencing_metrics_pipeline.sh
+    ├── plot_sequencing_metrics.R
     │
     ├── run_sm.sh
     ├── plot_sm.R
     │
-    ├── fig1.yml
+    ├── sequencing_metrics.yml
     │
     └── README.md
 
@@ -55,7 +53,7 @@ independently.
 
 ------------------------------------------------------------------------
 
-# Pipeline 1: Sequencing Metrics (Fig1)
+# Pipeline 1: Sequencing Metrics
 
 This pipeline computes sequencing statistics and generates plots used to
 evaluate sequencing data quality.
@@ -101,15 +99,15 @@ Reference genome:
 
 Basic usage:
 
-    bash run_fig1_pipeline.sh sample_ids.txt
+    bash run_sequencing_metrics_pipeline.sh sample_ids.txt
 
 Full usage:
 
-    bash run_fig1_pipeline.sh \
+    bash run_sequencing_metrics_pipeline.sh \
         sample_ids.txt \
         8 \
         ../lab_data \
-        ./fig1_results \
+        ./sequencing_metrics_results \
         reference.fa
 
 ------------------------------------------------------------------------
@@ -134,7 +132,7 @@ Inside each sample directory:
 
 ## Aggregated tables
 
-    fig1_results/bridge_tsv/
+    sequencing_metrics_results/bridge_tsv/
 
 Example files:
 
@@ -146,16 +144,16 @@ Example files:
 
 ## Final plots
 
-    fig1_results/plots/
+    sequencing_metrics_results/plots/
 
 Examples:
 
-    Fig1_reads_coverage.pdf
-    Fig2_lorenz_gini.pdf
-    Fig3_depth_distribution_0_100.pdf
-    Fig4_chrom_window_coverage_all_samples.pdf
-    Fig5_vaf_raw_including_zero.pdf
-    Fig5_vaf_raw_excluding_zero.pdf
+    reads_coverage_curve.pdf
+    lorenz_curve_and_gini.pdf
+    depth_distribution_0_100.pdf
+    chrom_window_coverage_all_samples.pdf
+    vaf_raw_including_zero.pdf
+    vaf_raw_excluding_zero.pdf
 
 ------------------------------------------------------------------------
 
@@ -188,8 +186,8 @@ Required R packages:
 
 Create environment:
 
-    conda env create -f fig1.yml
-    conda activate fig1
+    conda env create -f sequencing_metrics.yml
+    conda activate sequencing_metrics
 
 ------------------------------------------------------------------------
 
@@ -197,6 +195,15 @@ Create environment:
 
 This pipeline evaluates somatic mutation calls by comparing two mutation
 call sets and estimating performance metrics.
+
+Rationale:
+
+This analysis uses cross-test comparisons to separate signal that is
+reproducible across call sets from signal that is likely technical
+noise. By benchmarking overlap with germline-derived expectations and a
+pseudo-false-positive reference, it provides a practical way to estimate
+precision, pseudo-true-positive rates, and burden correction factors for
+somatic call sets.
 
 The pipeline produces:
 
