@@ -138,7 +138,7 @@ Plots are written to `sequencing_metrics_results/plots/`, including:
 
 ## Biological and Analytical Scope
 
-This workflow benchmarks a primary somatic call set against a comparison somatic call set derived from an independent test, replicate, or matched analysis. Germline calls are used to define an expected variant scale, and a pseudo-false-positive reference is used to approximate background error. The purpose is to obtain interpretable pseudo-true-positive rates, pseudo-false-positive rates, mixture summaries, and burden estimates rather than relying on raw call counts alone.
+This workflow is designed for settings in which a somatic mutation call set is defined as the set of mutations that are unique relative to a bulk comparator from the same tissue. The benchmark then asks how that primary unique-mutation set behaves when compared with a second unique-mutation set generated against a different bulk tissue or cell-line comparator. Germline call sets from the sample and from the comparison tissue or cell line are used to establish the expected variant background, and a broad germline-mark reference is used to define a pseudo-false-positive background. The aim is to obtain interpretable pseudo-true-positive rates, pseudo-false-positive rates, mixture summaries, and burden estimates under this cross-comparison design.
 
 ## Required Inputs
 
@@ -146,11 +146,11 @@ All VCF inputs must be compressed and indexed.
 
 - `--sample SAMPLE`: sample identifier used in output filenames
 - `--callable 2500000000`: number of callable bases used as the denominator for rate calculations
-- `--somatic somatic.vcf.gz`: primary somatic call set under evaluation
-- `--cross cross_test_somatic.vcf.gz`: comparison somatic call set from the independent test or replicate
+- `--somatic somatic.vcf.gz`: primary somatic call set under evaluation. In a standard somatic-calling workflow for this analysis, this file should contain mutations that are unique relative to a bulk sample from the same tissue as the primary sample.
+- `--cross cross_test_somatic.vcf.gz`: comparison somatic call set. In this workflow, this file should contain mutations that are unique relative to a bulk sample from another tissue or from a comparison cell line. Use of a well-characterized cell line as the comparison tissue or comparator source is strongly recommended.
 - `--germS germline_sample.vcf.gz`: germline call set associated with the primary sample
-- `--germT germline_test.vcf.gz`: germline call set associated with the comparison sample or test
-- `--fpref pseudo_fp_reference.vcf.gz`: reference VCF used to define a pseudo-false-positive background set
+- `--germT germline_test.vcf.gz`: germline call set associated with the comparison tissue or comparison cell line
+- `--fpref pseudo_fp_reference.vcf.gz`: reference VCF that includes as comprehensively as possible the germline mutation marks that may be present in the sample. This file is used to define a pseudo-false-positive background set.
 - `--out results`: output directory
 
 Optional inputs:
@@ -163,6 +163,13 @@ Important note on defaults and example values:
 
 - The example value `2500000000` for `--callable` is not a recommended universal default. Users should calculate callable bases for their own data.
 - The default `--reflen 3137300923` is a convenience value and should be replaced when the relevant reference length differs.
+
+Practical guidance on file construction:
+
+- The scientific meaning of this benchmark depends on how the input VCFs were generated.
+- The `--somatic` and `--cross` inputs should be produced with comparable calling and filtering logic so that differences reflect biology and comparator choice rather than pipeline asymmetry.
+- The comparison input used for `--cross` should preferably be based on a well-characterized cell line or other well-controlled comparator, because poorly characterized comparison material can weaken the interpretability of pseudo-true-positive and pseudo-false-positive estimates.
+- The `--fpref` input should be intentionally inclusive with respect to possible germline marks; an incomplete file will reduce its usefulness as a pseudo-false-positive background reference.
 
 ## Running the Workflow
 
